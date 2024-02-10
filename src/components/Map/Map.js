@@ -6,8 +6,9 @@ export default function Map() {
   const url = "http://localhost:8080/api/map";
   const [lat, setLat] = useState(37.874641);
   const [lon, setLon] = useState(32.493156);
-  const [rad, setRad] = useState(1000);
-  const [popup, setPopup] = useState("No information");
+  const [rad, setRad] = useState(400);
+  const [error, setError] = useState(null);
+  const [popup, setPopup] = useState(null);
   const [jsonRes, setJsonRes] = useState([]);
   const [query, setQuery] = useState({
     latitude: null,
@@ -25,8 +26,21 @@ export default function Map() {
       const result = await axios.post(url, query);
       console.log(result);
       setJsonRes(JSON.parse(result.data.jsonResponse));
-    } catch (error) {
-      console.log(error);
+      const jsonRes = JSON.parse(result.data.jsonResponse);
+      if (jsonRes.error != null) {
+        setError(jsonRes.error);
+        setLat(query.latitude);
+        setLon(query.longitude);
+        setRad(query.radius);
+      } else {
+        setError(null);
+        setLat(query.latitude);
+        setLon(query.longitude);
+        setRad(query.radius);
+        setPopup(jsonRes.display_name);
+      }
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -42,9 +56,13 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker position={[lat, lon]}>
-          <Popup>{popup}</Popup>
+          <Popup>{error != null ? error : popup}</Popup>
         </Marker>
-        <Circle center={[lat, lon]} radius={rad}></Circle>
+        <Circle
+          center={[lat, lon]}
+          radius={rad}
+          pathOptions={error ? { color: "red" } : { color: "blue" }}
+        ></Circle>
       </MapContainer>
       <div className="mx-3">
         <form onSubmit={onSubmit}>
