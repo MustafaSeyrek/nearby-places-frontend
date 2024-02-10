@@ -1,11 +1,14 @@
 import React, { useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup } from "react-leaflet";
+import axios from "axios";
 
 export default function Map() {
+  const url = "http://localhost:8080/api/map";
   const [lat, setLat] = useState(37.874641);
   const [lon, setLon] = useState(32.493156);
-  const [radius, setRadius] = useState(1000);
+  const [rad, setRad] = useState(1000);
   const [popup, setPopup] = useState("No information");
+  const [jsonRes, setJsonRes] = useState([]);
   const [query, setQuery] = useState({
     latitude: null,
     longitude: null,
@@ -16,7 +19,16 @@ export default function Map() {
     setQuery({ ...query, [e.target.name]: e.target.value });
   };
 
-  const onSubmit = async (e) => {};
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await axios.post(url, query);
+      console.log(result);
+      setJsonRes(JSON.parse(result.data.jsonResponse));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div style={{ display: "flex" }}>
@@ -32,10 +44,10 @@ export default function Map() {
         <Marker position={[lat, lon]}>
           <Popup>{popup}</Popup>
         </Marker>
-        <Circle center={[lat, lon]} radius={radius}></Circle>
+        <Circle center={[lat, lon]} radius={rad}></Circle>
       </MapContainer>
       <div className="mx-3">
-        <form onSubmit={() => onSubmit()}>
+        <form onSubmit={onSubmit}>
           <div className="form-group row mt-3">
             <label htmlFor="latitude" className="col-sm-3 col-form-label">
               Latitude:
@@ -46,7 +58,9 @@ export default function Map() {
                 type="number"
                 className="form-control"
                 id="latitude"
+                name="latitude"
                 placeholder="Latitude"
+                step="any"
                 onChange={(e) => onInputChange(e)}
               />
             </div>
@@ -62,7 +76,9 @@ export default function Map() {
                 type="number"
                 className="form-control"
                 id="longitude"
+                name="longitude"
                 placeholder="Longitude"
+                step="any"
                 onChange={(e) => onInputChange(e)}
               />
             </div>
@@ -78,7 +94,9 @@ export default function Map() {
                 type="number"
                 className="form-control"
                 id="radius"
+                name="radius"
                 placeholder="Radius"
+                step="any"
                 onChange={(e) => onInputChange(e)}
               />
             </div>
