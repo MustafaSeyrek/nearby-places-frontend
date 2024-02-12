@@ -3,13 +3,12 @@ import { MapContainer, TileLayer, Marker, Circle, Popup } from "react-leaflet";
 import axios from "axios";
 
 export default function Map() {
-  const url = "http://localhost:8080/api/map";
+  const url = "https://nearby-places-backend-git-konyaizmir111-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com/api/map";
   const [lat, setLat] = useState(37.874641);
   const [lon, setLon] = useState(32.493156);
   const [rad, setRad] = useState(400);
   const [error, setError] = useState(null);
   const [popup, setPopup] = useState(null);
-  const [jsonRes, setJsonRes] = useState([]);
   const [query, setQuery] = useState({
     latitude: null,
     longitude: null,
@@ -24,8 +23,6 @@ export default function Map() {
     e.preventDefault();
     try {
       const result = await axios.post(url, query);
-      console.log(result);
-      setJsonRes(JSON.parse(result.data.jsonResponse));
       const jsonRes = JSON.parse(result.data.jsonResponse);
       if (jsonRes.error != null) {
         setError(jsonRes.error);
